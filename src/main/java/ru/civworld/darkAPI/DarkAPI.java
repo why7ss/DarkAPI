@@ -3,6 +3,7 @@ package ru.civworld.darkAPI;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.bukkit.command.CommandExecutor;
+import org.bukkit.command.TabCompleter;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
 
@@ -84,6 +85,27 @@ public final class DarkAPI extends JavaPlugin {
 
             cmd.setExecutor(executor);
 
+        } catch (Exception e) {
+            DarkAPI.error("Failed to register command: " + e.getMessage());
+        }
+    }
+
+    public static void setCommand(String command, CommandExecutor executor, TabCompleter tabCompleter) {
+        try {
+            JavaPlugin plugin = getCallingPlugin();
+
+            if (plugin == null) {
+                DarkAPI.error("Failed to determine calling plugin for command registration.");
+                return;
+            }
+            var cmd = plugin.getCommand(command);
+            if (cmd == null) {
+                plugin.getLogger().severe("Command " + command + " not found in plugin.yml");
+                return;
+            }
+
+            cmd.setTabCompleter(tabCompleter);
+            cmd.setExecutor(executor);
         } catch (Exception e) {
             DarkAPI.error("Failed to register command: " + e.getMessage());
         }
