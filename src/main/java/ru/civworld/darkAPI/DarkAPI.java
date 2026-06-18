@@ -79,13 +79,17 @@ public final class DarkAPI extends JavaPlugin {
                 ? pluginParses.getOrDefault(plugin, Map.of())
                 : Map.of();
 
-        String result = text.replace("<prefix>", prefix);
+        String result = text;
 
-        // apply custom parses
+        // 1. сначала кастомные плейсхолдеры (<spawn> и т.д.)
         for (Map.Entry<String, String> entry : parses.entrySet()) {
             result = result.replace(entry.getKey(), entry.getValue());
         }
 
+        // 2. потом prefix
+        result = result.replace("<prefix>", prefix);
+
+        // 3. только потом MiniMessage
         return MiniMessage.miniMessage().deserialize("<!i>" + result);
     }
 
