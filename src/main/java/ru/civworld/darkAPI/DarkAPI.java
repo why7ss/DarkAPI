@@ -11,8 +11,12 @@ import java.util.HashMap;
 import java.util.Map;
 
 public final class DarkAPI extends JavaPlugin {
+
     private static final Map<Plugin, String> pluginPrefixes = new HashMap<>();
-    private static final String DEFAULT_PREFIX = "<gray>[<blue>DarkAPI<gray>] <white>";
+    private static final Map<Plugin, Map<String, String>> pluginParses = new HashMap<>();
+
+    private static final String DEFAULT_PREFIX =
+            "<gray>[<blue>DarkAPI<gray>] <white>";
 
     @Override
     public void onEnable() {
@@ -21,7 +25,21 @@ public final class DarkAPI extends JavaPlugin {
 
     public static void registerPlugin(Plugin plugin, String prefix) {
         pluginPrefixes.put(plugin, prefix);
-        if(plugin != null) plugin.getLogger().info("Hooking into DarkAPI...");
+        pluginParses.putIfAbsent(plugin, new HashMap<>());
+
+        if (plugin != null) {
+            plugin.getLogger().info("Hooking into DarkAPI...");
+        }
+    }
+
+    // NEW: setParse
+    public static void setParse(String key, String text) {
+        Plugin plugin = getCallingPlugin();
+        if (plugin == null) return;
+
+        pluginParses
+                .computeIfAbsent(plugin, p -> new HashMap<>())
+                .put(key, text);
     }
 
     private static JavaPlugin getCallingPlugin() {
@@ -46,12 +64,29 @@ public final class DarkAPI extends JavaPlugin {
 
     public static Component parse(String text) {
         if (text == null || text.isEmpty()) return Component.empty();
+
         Plugin plugin = getCallingPlugin();
+
         if (plugin == null) {
-            DarkAPI.error("Failed to determine calling plugin for command registration.");
+            DarkAPI.error("Failed to determine calling plugin for parse().");
         }
-        String prefix = plugin != null ? pluginPrefixes.getOrDefault(plugin, DEFAULT_PREFIX) : DEFAULT_PREFIX;
-        return MiniMessage.miniMessage().deserialize("<!i>" + text.replace("<prefix>", prefix));
+
+        String prefix = plugin != null
+                ? pluginPrefixes.getOrDefault(plugin, DEFAULT_PREFIX)
+                : DEFAULT_PREFIX;
+
+        Map<String, String> parses = plugin != null
+                ? pluginParses.getOrDefault(plugin, Map.of())
+                : Map.of();
+
+        String result = text.replace("<prefix>", prefix);
+
+        // apply custom parses
+        for (Map.Entry<String, String> entry : parses.entrySet()) {
+            result = result.replace(entry.getKey(), entry.getValue());
+        }
+
+        return MiniMessage.miniMessage().deserialize("<!i>" + result);
     }
 
     public static void broadcast(String text) {
@@ -77,6 +112,7 @@ public final class DarkAPI extends JavaPlugin {
                 DarkAPI.error("Failed to determine calling plugin for command registration.");
                 return;
             }
+
             var cmd = plugin.getCommand(command);
             if (cmd == null) {
                 plugin.getLogger().severe("Command " + command + " not found in plugin.yml");
@@ -90,7 +126,9 @@ public final class DarkAPI extends JavaPlugin {
         }
     }
 
-    public static void setCommand(String command, CommandExecutor executor, TabCompleter tabCompleter) {
+    public static void setCommand(String command,
+                                  CommandExecutor executor,
+                                  TabCompleter tabCompleter) {
         try {
             JavaPlugin plugin = getCallingPlugin();
 
@@ -98,6 +136,7 @@ public final class DarkAPI extends JavaPlugin {
                 DarkAPI.error("Failed to determine calling plugin for command registration.");
                 return;
             }
+
             var cmd = plugin.getCommand(command);
             if (cmd == null) {
                 plugin.getLogger().severe("Command " + command + " not found in plugin.yml");
@@ -106,6 +145,7 @@ public final class DarkAPI extends JavaPlugin {
 
             cmd.setTabCompleter(tabCompleter);
             cmd.setExecutor(executor);
+
         } catch (Exception e) {
             DarkAPI.error("Failed to register command: " + e.getMessage());
         }
