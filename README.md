@@ -10,7 +10,7 @@
 ```
 ### Dependence
 ```gradle
-implementation 'com.github.why7ss7why-max:DarkAPI:v1.0.3'
+implementation 'com.github.why7ss7why-max:DarkAPI:v1.0.4'
 ```
 
 `build.gradle.kts`
@@ -24,7 +24,7 @@ implementation 'com.github.why7ss7why-max:DarkAPI:v1.0.3'
 
 ### Dependence
 ```gradle
-implementation("com.github.why7ss7why-max:DarkAPI:v1.0.3")
+implementation("com.github.why7ss7why-max:DarkAPI:v1.0.4")
 ```
 
 ## First step
