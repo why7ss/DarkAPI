@@ -1,8 +1,8 @@
 name: DarkAPI
 version: '1.0-SNAPSHOT'
-main: ru.civworld.darkAPI.DarkAPI
+main: me.uuun.darkAPI.DarkAPI
 api-version: '1.20'
 prefix: DarkAPI
 authors: [ uuun ]
 description: API for uuun developer
-website: https://dsc.gg/civworld
+website: https://github.com/why7ss/DarkAPI
